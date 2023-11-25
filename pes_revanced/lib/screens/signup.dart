@@ -6,6 +6,7 @@ import 'package:pes_revanced/layouts/mobile_screen_layout.dart';
 import 'package:pes_revanced/screens/login.dart';
 // import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pes_revanced/constants.dart';
+import 'package:http/http.dart' as http;
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -17,10 +18,9 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   // final _auth = FirebaseAuth.instance;
-  late String _email;
-  late String _password;
-  late String _confirmPass;
-  bool _saving = false;
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+  final TextEditingController _confirmPass = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -33,14 +33,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
       },
       child: Scaffold(
         body: LoaderOverlay(
-          useDefaultLoading: _saving,
+          useDefaultLoading: false,
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const TopScreenImage(screenImageName: 'signup.png'),
+                  const TopScreenImage(screenImageName: 'assets/PES_Logo.png'),
                   Expanded(
                     flex: 2,
                     child: Padding(
@@ -54,9 +54,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           const ScreenTitle(title: 'Sign Up'),
                           CustomTextField(
                             textField: TextField(
-                              onChanged: (value) {
-                                _email = value;
-                              },
+                              controller: _email,
                               style: const TextStyle(
                                 fontSize: 20,
                               ),
@@ -68,9 +66,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           CustomTextField(
                             textField: TextField(
                               obscureText: true,
-                              onChanged: (value) {
-                                _password = value;
-                              },
+                              controller: _password,
                               style: const TextStyle(
                                 fontSize: 20,
                               ),
@@ -82,9 +78,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           CustomTextField(
                             textField: TextField(
                               obscureText: true,
-                              onChanged: (value) {
-                                _confirmPass = value;
-                              },
+                              controller: _confirmPass,
                               style: const TextStyle(
                                 fontSize: 20,
                               ),
@@ -95,54 +89,76 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                           CustomBottomScreen(
                             textButton: 'Sign Up',
-                            heroTag: 'signup_btn',
                             question: 'Have an account?',
                             buttonPressed: () async {
                               FocusManager.instance.primaryFocus?.unfocus();
-                              setState(() {
-                                _saving = true;
-                              });
-                              if (_confirmPass == _password) {
+                              context.loaderOverlay.show();
+                              if (_confirmPass.value.text ==
+                                  _password.value.text) {
                                 try {
-                                  // await _auth.createUserWithEmailAndPassword(
-                                  //     email: _email, password: _password);
+                                  final response = await http.post(
+                                      Uri.parse('$goURI/register'),
+                                      body: {
+                                        "email": _email.value.text,
+                                        "pass": _password.value.text
+                                      }).timeout(const Duration(seconds: 20),
+                                      onTimeout: () =>
+                                          http.Response('Error', 408));
 
-                                  if (context.mounted) {
-                                    // signUpAlert(
-                                    //   context: context,
-                                    //   title: 'GOOD JOB',
-                                    //   desc: 'Go login now',
-                                    //   btnText: 'Login Now',
-                                    //   onPressed: () {
-                                    //     setState(() {
-                                    //       _saving = false;
-                                    //       Navigator.popAndPushNamed(
-                                    //           context, SignUpScreen.id);
-                                    //     });
-                                    //     Navigator.pushNamed(
-                                    //         context, LoginScreen.id);
-                                    //   },
-                                    // ).show();
+                                  if (response.statusCode == 200) {
+                                    if (context.mounted) {
+                                      Navigator.of(context).pushReplacement(
+                                          PageRouteBuilder(
+                                              pageBuilder: (context, animation,
+                                                      secondaryAnimation) =>
+                                                  const LoginScreen()));
+                                    }
+                                  } else {
+                                    throw ErrorDescription(
+                                        response.body.toString());
                                   }
                                 } catch (e) {
-                                  // signUpAlert(
-                                  //     context: context,
-                                  //     onPressed: () {
-                                  //       SystemNavigator.pop();
-                                  //     },
-                                  //     title: 'SOMETHING WRONG',
-                                  //     desc: 'Close the app and try again',
-                                  //     btnText: 'Close Now');
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context)
+                                        .showSnackBar(SnackBar(
+                                      content: Text(
+                                        "Error in signIn $e",
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      duration: const Duration(seconds: 5),
+                                      backgroundColor: Colors.deepOrange,
+                                      elevation: 10,
+                                      shape: RoundedRectangleBorder(
+                                        side: const BorderSide(
+                                            color: Colors.red, width: 1),
+                                        borderRadius: BorderRadius.circular(24),
+                                      ),
+                                    ));
+                                  }
+                                } finally {
+                                  if (context.mounted) {
+                                    context.loaderOverlay.hide();
+                                  }
                                 }
                               } else {
-                                // showAlert(
-                                //     context: context,
-                                //     title: 'WRONG PASSWORD',
-                                //     desc:
-                                //         'Make sure that you write the same password twice',
-                                //     onPressed: () {
-                                //       Navigator.pop(context);
-                                //     }).show();
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                  content: const Text(
+                                    "Password and Confirmed Password Not same",
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  duration: const Duration(seconds: 5),
+                                  backgroundColor: Colors.deepOrange,
+                                  elevation: 10,
+                                  shape: RoundedRectangleBorder(
+                                    side: const BorderSide(
+                                        color: Colors.red, width: 1),
+                                    borderRadius: BorderRadius.circular(24),
+                                  ),
+                                ));
+                              }
+                              if (context.mounted) {
+                                context.loaderOverlay.hide();
                               }
                             },
                             questionPressed: () async {

@@ -7,3 +7,4 @@ const InputDecoration kTextInputDecoration = InputDecoration(
   hintText: '',
   // ),
 );
+const String goURI = "http://10.5.18.244:6969";

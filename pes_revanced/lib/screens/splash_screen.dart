@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pes_revanced/constants.dart';
 import 'package:pes_revanced/layouts/mobile_screen_layout.dart';
 import 'package:http/http.dart' as http;
 import 'package:pes_revanced/screens/auth.dart';
@@ -29,7 +30,7 @@ class _SplashScreenState extends State<SplashScreen> {
     try {
       await Future.delayed(const Duration(seconds: 2));
       final response = await http
-          .get(Uri.parse('http://10.14.146.73:6969/ping'))
+          .get(Uri.parse('$goURI/ping'))
           .timeout(const Duration(seconds: 10), onTimeout: () {
         return http.Response('Error', 408);
       });
@@ -66,7 +67,7 @@ class _SplashScreenState extends State<SplashScreen> {
       ));
       return;
     }
-    Navigator.of(context).pushReplacement(
+    Navigator.of(context).push(
       PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
               isGranted == Access.ok

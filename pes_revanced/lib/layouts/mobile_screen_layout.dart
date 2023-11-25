@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:pes_revanced/constants.dart';
 import 'package:pes_revanced/screens/courses.dart';
 import 'package:pes_revanced/screens/notifications.dart';
 // import 'package:insta_clone/db_access_provider/user_provider.dart';
@@ -75,7 +76,7 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: PageView(
-        physics: const NeverScrollableScrollPhysics(),
+        physics: const BouncingScrollPhysics(),
         controller: pageController,
         onPageChanged: onPageChanged,
         children: [
@@ -175,7 +176,7 @@ Future<String> fetchData() async {
   // }
   // return "Hello";
   try {
-    final response = await http.get(Uri.parse('http://10.14.146.73:6969/data'));
+    final response = await http.get(Uri.parse('$goURI/data'));
     if (response.statusCode == 200) {
       Map<String, dynamic> map = json.decode(response.body);
       return map.toString();
@@ -207,7 +208,12 @@ class PopulateCourses extends StatelessWidget {
                 itemCount: snapshot.data?.length,
                 itemBuilder: (context, index) {
                   final item = snapshot.data?[index];
-                  return CourseCard(courseItem: item!);
+                  return Column(children: [
+                    CourseCard(courseItem: item!),
+                    const SizedBox(
+                      height: 10,
+                    )
+                  ]);
                 });
           }
         });
@@ -217,7 +223,7 @@ class PopulateCourses extends StatelessWidget {
 Future<List<CoursesModel>> fetchCourses() async {
   try {
     final response =
-        await http.get(Uri.parse('http://10.14.146.73:6969/course'));
+        await http.get(Uri.parse("$goURI/course"));
     if (response.statusCode == 200) {
       Map<String, dynamic> map = json.decode(response.body);
       List<dynamic> map2 = map["data"];
