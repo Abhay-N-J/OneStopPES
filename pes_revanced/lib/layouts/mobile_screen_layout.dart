@@ -51,7 +51,7 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
 
   // static List<Widget> homeScreenItems =
 
-  static const primaryColor = Colors.white;
+  static const primaryColor = Colors.pink;
   static const secondaryColor = Colors.grey;
   static const mobileBackgroundColor = Color.fromRGBO(0, 0, 0, 1);
 
