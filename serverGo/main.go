@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func main() {
@@ -42,10 +43,10 @@ func main() {
 
 	router.GET("/course", func(ctx *gin.Context) {
 		data, err := getCourses(db)
-		fmt.Println(data, err)
+
 		if err != nil {
 			ctx.JSON(http.StatusServiceUnavailable, gin.H{
-				"error": err,
+				"error": err.Error(),
 			})
 			return
 		}
@@ -54,6 +55,34 @@ func main() {
 			"data":  data,
 		})
 
+	})
+
+	router.POST("/login", func(ctx *gin.Context) {
+		email := ctx.PostForm("email")
+		pass := ctx.PostForm("pass")
+		data, err := verifyLogin(db, email, pass)
+		fmt.Println(data, err)
+		if err != nil {
+			ctx.JSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+			})
+		} else {
+			ctx.JSON(http.StatusOK, data)
+		}
+	})
+
+	router.POST("/register", func(ctx *gin.Context) {
+		email := ctx.PostForm("email")
+		pass := ctx.PostForm("pass")
+		data, err := signUp(db, email, pass)
+		fmt.Println(data, err)
+		if err != nil {
+			ctx.JSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+			})
+		} else {
+			ctx.JSON(http.StatusOK, data)
+		}
 	})
 
 	router.Run(":6969")
@@ -74,6 +103,54 @@ func main() {
 	// // Start the server on port 8080
 	// fmt.Println("Server is running on port 8080")
 	// http.ListenAndServe(":8080", nil)
+}
+
+func verifyLogin(db *sql.DB, email string, pass string) (map[string]string, error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(pass), 10)
+	if err != nil {
+		return nil, err
+	}
+	query := "SELECT EMAIL FROM LOGINS WHERE EMAIL=?"
+	row, err := db.Query(query, email)
+	if err != nil || !row.Next() {
+		return nil, fmt.Errorf("Email or Password is wrong")
+	}
+	row.Scan(&email, &pass)
+	err = bcrypt.CompareHashAndPassword(hash, []byte(pass))
+	if err != nil {
+		return nil, fmt.Errorf("Email or Password is wrong")
+	}
+	query = "SELECT SRN, BRANCH, SECTION FROM STUDENT WHERE EMAIL=?"
+	row, err = db.Query(query, email)
+	var branch, section string
+	var srn int
+	row.Next()
+	row.Scan(&srn, &branch, &section)
+	return map[string]string{
+		"srn":     strconv.Itoa(srn),
+		"branch":  branch,
+		"section": section,
+	}, nil
+
+}
+
+func signUp(db *sql.DB, email string, pass string) (map[string]string, error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(pass), 10)
+	if err != nil {
+		return nil, err
+	}
+	query := "SELECT EMAIL FROM LOGINS WHERE EMAIL=?"
+	row, err := db.Query(query, email)
+	if err != nil || row.Next() {
+		return nil, fmt.Errorf("User already registered")
+	}
+	query = "INSERT INTO LOGINS(EMAIL, PASS) VALUES(?, ?)"
+	_, err = db.Exec(query, email, hash)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]string{"error": "false"}, nil
+
 }
 
 func getCourses(db *sql.DB) ([]map[string]string, error) {
