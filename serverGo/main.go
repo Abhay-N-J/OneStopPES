@@ -85,6 +85,22 @@ func main() {
 		}
 	})
 
+	router.GET("/notifs", func(ctx *gin.Context) {
+		srn, err := strconv.Atoi(ctx.Query("srn"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		data, err := getNotifs(db, srn)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"data": data,
+		})
+
+	})
+
 	router.Run(":6969")
 
 	// Handle the root endpoint ("/") with a custom handler function
@@ -106,30 +122,33 @@ func main() {
 }
 
 func verifyLogin(db *sql.DB, email string, pass string) (map[string]string, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(pass), 10)
-	if err != nil {
-		return nil, err
-	}
-	query := "SELECT EMAIL FROM LOGINS WHERE EMAIL=?"
+
+	query := "SELECT EMAIL, PASS FROM LOGINS WHERE EMAIL=?"
 	row, err := db.Query(query, email)
+
 	if err != nil || !row.Next() {
 		return nil, fmt.Errorf("Email or Password is wrong")
 	}
-	row.Scan(&email, &pass)
-	err = bcrypt.CompareHashAndPassword(hash, []byte(pass))
+
+	defer row.Close()
+
+	var hash string
+	row.Scan(&email, &hash)
+	err = bcrypt.CompareHashAndPassword([]byte(hash), []byte(pass))
 	if err != nil {
+		fmt.Println("hre", hash)
 		return nil, fmt.Errorf("Email or Password is wrong")
 	}
-	query = "SELECT SRN, BRANCH, SECTION FROM STUDENT WHERE EMAIL=?"
+	query = "SELECT SRN, BRANCH, SEM FROM STUDENT WHERE EMAIL=?"
 	row, err = db.Query(query, email)
-	var branch, section string
-	var srn int
+	var branch string
+	var srn, sem int
 	row.Next()
-	row.Scan(&srn, &branch, &section)
+	row.Scan(&srn, &branch, &sem)
 	return map[string]string{
-		"srn":     strconv.Itoa(srn),
-		"branch":  branch,
-		"section": section,
+		"srn":    strconv.Itoa(srn),
+		"branch": branch,
+		"sem":    strconv.Itoa(sem),
 	}, nil
 
 }
@@ -141,16 +160,47 @@ func signUp(db *sql.DB, email string, pass string) (map[string]string, error) {
 	}
 	query := "SELECT EMAIL FROM LOGINS WHERE EMAIL=?"
 	row, err := db.Query(query, email)
+
 	if err != nil || row.Next() {
 		return nil, fmt.Errorf("User already registered")
 	}
+
+	defer row.Close()
+
 	query = "INSERT INTO LOGINS(EMAIL, PASS) VALUES(?, ?)"
-	_, err = db.Exec(query, email, hash)
+	_, err = db.Exec(query, email, string(hash))
 	if err != nil {
 		return nil, err
 	}
 	return map[string]string{"error": "false"}, nil
 
+}
+
+func getNotifs(db *sql.DB, srn int) ([]map[string]string, error) {
+	result := make([]map[string]string, 0)
+
+	query := "CALL getStudentAnnouncements(?)"
+
+	rows, err := db.Query(query, srn)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		r := make(map[string]string)
+		var link, message, title string
+		rows.Scan(&link, &message, &title)
+		println(link, message, title)
+		r["link"] = link
+		r["message"] = message
+		r["title"] = title
+		result = append(result, r)
+	}
+
+	return result, nil
 }
 
 func getCourses(db *sql.DB) ([]map[string]string, error) {

@@ -67,7 +67,7 @@ class _SplashScreenState extends State<SplashScreen> {
       ));
       return;
     }
-    Navigator.of(context).push(
+    Navigator.of(context).pushReplacement(
       PageRouteBuilder(
           pageBuilder: (context, animation, secondaryAnimation) =>
               isGranted == Access.ok

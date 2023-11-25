@@ -62,6 +62,7 @@ dependencies:
   timeago: 3.2.2
   flutterflow_ui: ^0.2.0+1
   http: ^0.13.6
+  url_launcher: ^6.2.1
 
 
 dev_dependencies:

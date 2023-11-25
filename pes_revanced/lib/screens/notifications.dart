@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pes_revanced/components/image_container.dart';
+import 'package:url_launcher/url_launcher.dart';
 // import '/models/news_item_model.dart';
 // import '/screens/event_detail_screen.dart';
 
@@ -15,8 +16,7 @@ class NotificationModel {
     required this.sem,
     required this.message,
     required this.headline,
-    this.link =
-        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRi1xPp49YR8jawQYeWUmDLXzXbwFQb2OUZO4injt7gqA&s",
+    this.link = "",
   });
 }
 
@@ -28,14 +28,35 @@ class NotificationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      // onTap: () {
-      //   Navigator.push(
-      //     context,
-      //     MaterialPageRoute(
-      //       builder: (context) => EventDetailScreen(newsItem: newsItem),
-      //     ),
-      //   );
-      // },
+      onTap: () async {
+        try {
+          if (notifItem.link.isEmpty) {
+            throw ErrorDescription("Bad URL");
+          }
+          final uri = Uri.parse(notifItem.link);
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri);
+          } else {
+            throw ErrorDescription("Unable to launch URL");
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(
+                "$e",
+                textAlign: TextAlign.center,
+              ),
+              duration: const Duration(seconds: 5),
+              backgroundColor: Colors.deepOrange,
+              elevation: 10,
+              shape: RoundedRectangleBorder(
+                side: const BorderSide(color: Colors.red, width: 1),
+                borderRadius: BorderRadius.circular(24),
+              ),
+            ));
+          }
+        }
+      },
       child: Row(
         children: [
           ImageContainer(
@@ -51,7 +72,8 @@ class NotificationCard extends StatelessWidget {
             ],
             width: MediaQuery.of(context).size.width * 0.3,
             height: MediaQuery.of(context).size.height * 0.15,
-            imageUrl: notifItem.link,
+            imageUrl:
+                "https://i.pinimg.com/736x/1f/aa/9c/1faa9cd83704870669717e8b98c31102.jpg",
           ),
           Flexible(
             child:

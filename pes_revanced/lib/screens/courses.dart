@@ -30,7 +30,6 @@ class CourseCard extends StatefulWidget {
 }
 
 class _CourseCardState extends State<CourseCard> {
-  
   bool isExpanded = false;
 
   void toggleExpansion() {
@@ -44,25 +43,24 @@ class _CourseCardState extends State<CourseCard> {
     return Column(
       children: [
         GestureDetector(
-            onTap: toggleExpansion,
-        child : Container(
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-              Color.fromARGB(255, 20, 20, 20), // Starting color (gray)
-              Color.fromARGB(255, 145, 144, 144), // Ending color (white)
-              ],
-              stops: [0.0, 1.0], // Set the stops for the gradient
+          onTap: toggleExpansion,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color.fromARGB(255, 20, 20, 20), // Starting color (gray)
+                  Color.fromARGB(255, 145, 144, 144), // Ending color (white)
+                ],
+                stops: [0.0, 1.0], // Set the stops for the gradient
+              ),
+              border: Border.all(
+                color: Colors.black, // Border color
+                width: 1.0, // Border width
+              ),
+              borderRadius: BorderRadius.circular(8.0), // Border radius
             ),
-            border: Border.all(
-              color: Colors.black, // Border color
-              width: 1.0, // Border width
-            ),
-            borderRadius: BorderRadius.circular(8.0), // Border radius
-          ),
-        
             child: Row(
               children: [
                 ImageContainer(
@@ -79,7 +77,7 @@ class _CourseCardState extends State<CourseCard> {
                   width: MediaQuery.of(context).size.width * 0.2,
                   height: MediaQuery.of(context).size.height * 0.1,
                   imageUrl:
-                      'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRi1xPp49YR8jawQYeWUmDLXzXbwFQb2OUZO4injt7gqA&s',
+                      'https://i.pinimg.com/736x/1f/aa/9c/1faa9cd83704870669717e8b98c31102.jpg',
                 ),
                 Flexible(
                   child: Column(
@@ -94,20 +92,28 @@ class _CourseCardState extends State<CourseCard> {
                           ),
                           child: Text(
                             widget.courseItem.code,
-                            style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                                fontWeight: FontWeight.bold,
-                                height: 1.25,
-                                color: Colors.black),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    height: 1.25,
+                                    color: Colors.black),
                           ),
                         ),
-                        const SizedBox(height: 5,),
+                        const SizedBox(
+                          height: 5,
+                        ),
                         Text(
                           widget.courseItem.name,
                           overflow: TextOverflow.ellipsis,
-                          style: Theme.of(context).textTheme.titleMedium!.copyWith(
-                              fontWeight: FontWeight.bold,
-                              height: 1.25,
-                              color: Colors.white),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium!
+                              .copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  height: 1.25,
+                                  color: Colors.white),
                         ),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
@@ -147,10 +153,10 @@ class _CourseCardState extends State<CourseCard> {
           ),
         ),
         if (isExpanded)
-              Container(
-                //padding: EdgeInsets.all(16.0),
-                child: Text('Hello'),
-              ),
+          Container(
+            //padding: EdgeInsets.all(16.0),
+            child: Text('Hello'),
+          ),
       ],
     );
   }

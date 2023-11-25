@@ -31,7 +31,7 @@ MODIFY COLUMN MESSAGE VARCHAR(255);
 ALTER TABLE ANNOUNCEMENTS
 ADD PRIMARY KEY(BRANCH,SEM,TITLE,MESSAGE);
 
-INSERT INTO announcements (BRANCH, SEM, ADMIN_ID, LINK, MESSAGE, TITLE)
+INSERT INTO ANNOUNCEMENTS (BRANCH, SEM, ADMIN_ID, LINK, MESSAGE, TITLE)
 VALUES 
 ('Computer Science', 1, 1, 'https://example.com/link1', 'The meeting room has been changed to GJBC', 'Meeting Change'),
 ('Computer Science', 1, 2, 'https://example.com/link2', 'The review has been rescheduled to next week', 'Rescheduled Review'),

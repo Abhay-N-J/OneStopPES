@@ -4,8 +4,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:pes_revanced/constants.dart';
+import 'package:pes_revanced/screens/auth.dart';
 import 'package:pes_revanced/screens/courses.dart';
+import 'package:pes_revanced/screens/misc.dart';
 import 'package:pes_revanced/screens/notifications.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:insta_clone/db_access_provider/user_provider.dart';
 // import 'package:provider/provider.dart';
 // import 'package:insta_clone/models/user.dart' as model;
@@ -20,29 +23,6 @@ class MobileScreenLayout extends StatefulWidget {
 class _MobileScreenLayoutState extends State<MobileScreenLayout> {
   int _page = 0;
   late PageController pageController;
-
-  final List<NotificationModel> _notifs = [
-    NotificationModel(
-        branch: "CSE", sem: 1, message: "Hello", headline: "Guys"),
-    NotificationModel(branch: "CSE", sem: 2, message: "Guys", headline: "Hello")
-  ];
-
-  final List<CoursesModel> _courses = [
-    CoursesModel(
-        name: "Programming in Python",
-        code: "CS101",
-        dept: "CSE",
-        credits: 4,
-        isEC: false,
-        preReq: ""),
-    CoursesModel(
-        name: "Graph Thory and Algorithms",
-        code: "CS404",
-        dept: "CSE",
-        credits: 4,
-        isEC: true,
-        preReq: "DSA"),
-  ];
 
   @override
   void initState() {
@@ -75,47 +55,44 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        iconTheme: const IconThemeData(color: Colors.white),
+        elevation: 0,
+        actions: [
+          Builder(builder: (context) {
+            return IconButton(
+                icon: const Icon(Icons.logout),
+                onPressed: () async {
+                  final SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
+                  prefs.clear();
+                  if (context.mounted) {
+                    Navigator.of(context).pushReplacement(PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            const Auth()));
+                  }
+                });
+          })
+        ],
+      ),
       body: PageView(
         physics: const BouncingScrollPhysics(),
         controller: pageController,
         onPageChanged: onPageChanged,
         children: [
-          Center(
-            child: ListView.builder(
-                physics: const BouncingScrollPhysics(),
-                itemCount: _notifs.length,
-                itemBuilder: (context, index) {
-                  final item = _notifs[index];
-                  return NotificationCard(notifItem: item);
-                }),
-          ),
+          const Center(child: PopulateNotfis()),
           const Center(
             child: PopulateCourses(),
-            // child: ListView.builder(
-            //     physics: const BouncingScrollPhysics(),
-            //     itemCount: _courses.length,
-            //     itemBuilder: (context, index) {
-            //       final item = _courses[index];
-            //       return CourseCard(courseItem: item);
-            //     }),
           ),
           Center(
             child: Text("Dashboard"),
           ),
           Center(child: Text("Exams")),
           Center(
-              child: FutureBuilder(
-            future: fetchData(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const CircularProgressIndicator();
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
-              } else {
-                return Text(snapshot.data.toString());
-              }
-            },
-          ))
+            child: MiscPage(),
+          )
         ],
       ),
       bottomNavigationBar: CupertinoTabBar(
@@ -222,8 +199,7 @@ class PopulateCourses extends StatelessWidget {
 
 Future<List<CoursesModel>> fetchCourses() async {
   try {
-    final response =
-        await http.get(Uri.parse("$goURI/course"));
+    final response = await http.get(Uri.parse("$goURI/course"));
     if (response.statusCode == 200) {
       Map<String, dynamic> map = json.decode(response.body);
       List<dynamic> map2 = map["data"];
@@ -235,6 +211,66 @@ Future<List<CoursesModel>> fetchCourses() async {
               credits: int.parse(e["credits"]!),
               isEC: e["preReq"] != null ? true : false,
               preReq: e["preReq"] ?? " "))
+          .toList();
+      return values;
+    } else {
+      return [];
+    }
+  } catch (e) {
+    print(e.toString());
+    return [];
+  }
+}
+
+class PopulateNotfis extends StatelessWidget {
+  const PopulateNotfis({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<NotificationModel>>(
+        future: fetchNotifs(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          } else if (snapshot.data == null) {
+            return const Center(
+              child: Text("Error fetching data"),
+            );
+          } else {
+            return ListView.builder(
+                physics: const BouncingScrollPhysics(),
+                itemCount: snapshot.data?.length,
+                itemBuilder: (context, index) {
+                  final item = snapshot.data?[index];
+                  return Column(children: [
+                    NotificationCard(notifItem: item!),
+                    const SizedBox(
+                      height: 10,
+                    )
+                  ]);
+                });
+          }
+        });
+  }
+}
+
+Future<List<NotificationModel>> fetchNotifs() async {
+  try {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String srn = prefs.getString("srn")!;
+    final String branch = prefs.getString("branch")!;
+    final String sem = prefs.getString("sem")!;
+    final response = await http.get(Uri.parse("$goURI/notifs?srn=$srn"));
+    if (response.statusCode == 200) {
+      Map<String, dynamic> map = json.decode(response.body);
+      List<dynamic> map2 = map["data"];
+      var values = map2
+          .map((e) => NotificationModel(
+              branch: branch,
+              sem: int.parse(sem),
+              message: e["message"],
+              headline: e["title"],
+              link: e["link"]))
           .toList();
       return values;
     } else {
