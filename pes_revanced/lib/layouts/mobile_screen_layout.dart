@@ -221,7 +221,6 @@ Future<List<CoursesModel>> fetchCourses() async {
     if (response.statusCode == 200) {
       Map<String, dynamic> map = json.decode(response.body);
       List<dynamic> map2 = map["data"];
-      print(map2);
       var values = map2
           .map((e) => CoursesModel(
               name: e["name"]!,
@@ -231,7 +230,6 @@ Future<List<CoursesModel>> fetchCourses() async {
               isEC: e["preReq"] != null ? true : false,
               preReq: e["preReq"] ?? " "))
           .toList();
-      print(values.length);
       return values;
     } else {
       return [];
