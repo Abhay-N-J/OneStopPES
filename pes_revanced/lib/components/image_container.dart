@@ -31,8 +31,8 @@ class ImageContainer extends StatelessWidget {
       padding: padding,
       decoration: BoxDecoration(
         borderRadius: borderRadius,
-        image: DecorationImage(
-          image: NetworkImage(imageUrl),
+        image: const DecorationImage(
+          image: AssetImage('assets/PES_Logo.png'),
           fit: BoxFit.cover,
         ),
         boxShadow: boxShadow,

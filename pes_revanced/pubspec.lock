@@ -202,7 +202,7 @@ packages:
     source: hosted
     version: "6.1.4"
   fl_chart:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: fl_chart
       sha256: cf46edb10b096dc6197e561f6bb7929371baaaff2bca7848982670a152e3d23f

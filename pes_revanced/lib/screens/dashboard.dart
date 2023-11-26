@@ -121,10 +121,9 @@ class ProfileScreen extends StatelessWidget {
                               child: Row(
                                 children: [
                                   const CircleAvatar(
-                                    radius: 50,
-                                    backgroundImage: NetworkImage(
-                                        "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/22/22a4f44d8c8f1451f0eaa765e80b698bab8dd826_full.jpg"),
-                                  ),
+                                      radius: 50,
+                                      backgroundImage:
+                                          AssetImage('assets/person.jpg')),
                                   const SizedBox(width: 20),
                                   Column(
                                     crossAxisAlignment:

@@ -9,6 +9,7 @@ import 'package:pes_revanced/screens/courses.dart';
 import 'package:pes_revanced/screens/dashboard.dart';
 import 'package:pes_revanced/screens/misc.dart';
 import 'package:pes_revanced/screens/notifications.dart';
+import 'package:pes_revanced/screens/results.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // import 'package:insta_clone/db_access_provider/user_provider.dart';
 // import 'package:provider/provider.dart';
@@ -88,7 +89,9 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
           const Center(
             child: DashBoard(),
           ),
-          Center(child: Text("Exams")),
+          const Center(
+            child: PopulateResults(),
+          ),
           Center(
             child: MiscPage(),
           )
@@ -110,19 +113,19 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
             backgroundColor: primaryColor,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle,
+            icon: Icon(Icons.home,
                 color: _page == 2 ? primaryColor : secondaryColor),
             label: '',
             backgroundColor: primaryColor,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.favorite,
+            icon: Icon(Icons.grade_outlined,
                 color: _page == 3 ? primaryColor : secondaryColor),
             label: '',
             backgroundColor: primaryColor,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person,
+            icon: Icon(Icons.miscellaneous_services,
                 color: _page == 4 ? primaryColor : secondaryColor),
             label: '',
             backgroundColor: primaryColor,
@@ -131,20 +134,6 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
         onTap: navigationTapped,
       ),
     );
-  }
-}
-
-Future<String> fetchData() async {
-  try {
-    final response = await http.get(Uri.parse('$goURI/data'));
-    if (response.statusCode == 200) {
-      Map<String, dynamic> map = json.decode(response.body);
-      return map.toString();
-    } else {
-      return "Error";
-    }
-  } catch (e) {
-    return e.toString();
   }
 }
 
@@ -256,6 +245,54 @@ Future<List<NotificationModel>> fetchNotifs() async {
               message: e["message"],
               headline: e["title"],
               link: e["link"]))
+          .toList();
+      return values;
+    } else {
+      return [];
+    }
+  } catch (e) {
+    print(e.toString());
+    return [];
+  }
+}
+
+class PopulateResults extends StatelessWidget {
+  const PopulateResults({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<ResultModel>>(
+        future: fetchResults(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          } else if (snapshot.data == null) {
+            return const Center(
+              child: Text("Error fetching data"),
+            );
+          } else {
+            return ResultPage(resultData: snapshot.data!);
+          }
+        });
+  }
+}
+
+Future<List<ResultModel>> fetchResults() async {
+  try {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String srn = prefs.getString("srn")!;
+    final response = await http.get(Uri.parse("$goURI/results?srn=$srn"));
+    if (response.statusCode == 200) {
+      Map<String, dynamic> map = json.decode(response.body);
+      List<dynamic> map2 = map["data"];
+      var values = map2
+          .map((e) => ResultModel(
+              isa1: double.parse(e["isa1"]),
+              isa2: double.parse(e["isa2"]),
+              esa: double.parse(e["esa"]),
+              final1: double.parse(e["final"]),
+              code: e["code"],
+              grade: e["grade"]))
           .toList();
       return values;
     } else {
