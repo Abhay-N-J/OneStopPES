@@ -82,15 +82,15 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
         physics: const BouncingScrollPhysics(),
         controller: pageController,
         onPageChanged: onPageChanged,
-        children: [
-          const Center(child: PopulateNotfis()),
-          const Center(
+        children: const [
+          Center(child: PopulateNotfis()),
+          Center(
             child: PopulateCourses(),
           ),
-          const Center(
+          Center(
             child: DashBoard(),
           ),
-          const Center(
+          Center(
             child: PopulateResults(),
           ),
           Center(

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"strconv"
 
@@ -14,7 +15,7 @@ import (
 
 func main() {
 
-	db, err := sql.Open("mysql", "root:#MySQL123456789#@tcp(127.0.0.1:3306)/PROJECT_V1")
+	db, err := sql.Open("mysql", "abhay:a123@tcp(127.0.0.1:3306)/PROJECT_V1")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -155,6 +156,83 @@ func main() {
 
 	})
 
+	router.GET("/scholar", func(ctx *gin.Context) {
+		srn, err := strconv.Atoi(ctx.Query("srn"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		data, isReq, err := getScholars(db, srn)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"data":  data,
+			"isReq": strconv.FormatBool(isReq),
+		})
+
+	})
+
+	router.GET("/feed", func(ctx *gin.Context) {
+		srn, err := strconv.Atoi(ctx.Query("srn"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		data, err := getFeeds(db, srn)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"data": data,
+		})
+
+	})
+
+	router.POST("/bank", func(ctx *gin.Context) {
+		bank := ctx.PostForm("bank")
+		srn, err := strconv.Atoi(ctx.PostForm("srn"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		query := "UPDATE STUDENT SET ACC_INFO=? WHERE SRN=?"
+
+		_, err = db.Exec(query, bank, srn)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"error": false,
+		})
+
+	})
+
+	router.POST("/feedPost", func(ctx *gin.Context) {
+		query := ctx.PostForm("query")
+		srn, err := strconv.Atoi(ctx.PostForm("srn"))
+		reply := "Awaiting reply"
+
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		querydb := "INSERT INTO FEEDBACK_AND_REPLY(QUERY, REPLY, SRN, ADMIN_ID) VALUES(?, ?, ?, ?)"
+
+		_, err = db.Exec(querydb, query, reply, srn, rand.Intn(4)+1)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		ctx.JSON(http.StatusOK, gin.H{
+			"error": false,
+		})
+
+	})
+
 	router.Run(":6969")
 
 	// Handle the root endpoint ("/") with a custom handler function
@@ -254,6 +332,71 @@ func getNotifs(db *sql.DB, srn int) ([]map[string]string, error) {
 	}
 
 	return result, nil
+}
+
+func getFeeds(db *sql.DB, srn int) ([]map[string]string, error) {
+	result := make([]map[string]string, 0)
+
+	query := "SELECT QUERY, REPLY FROM FEEDBACK_AND_REPLY WHERE SRN=?"
+
+	rows, err := db.Query(query, srn)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		r := make(map[string]string)
+		var reply string
+		rows.Scan(&query, &reply)
+		r["query"] = query
+		r["reply"] = reply
+		result = append(result, r)
+	}
+
+	return result, nil
+}
+
+func getScholars(db *sql.DB, srn int) ([]map[string]string, bool, error) {
+	result := make([]map[string]string, 0)
+
+	query := "SELECT TYPE, SEM FROM SCHOLARSHIP WHERE SRN=?"
+
+	rows, err := db.Query(query, srn)
+
+	if err != nil {
+		return nil, false, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		r := make(map[string]string)
+		var typ string
+		var sem int
+		rows.Scan(&typ, &sem)
+		r["type"] = typ
+		r["sem"] = strconv.Itoa(sem)
+		result = append(result, r)
+	}
+
+	query = "SELECT ACC_INFO FROM STUDENT WHERE SRN=?"
+
+	row, err := db.Query(query, srn)
+
+	if err != nil {
+		return nil, false, err
+	}
+
+	defer row.Close()
+
+	row.Next()
+	var bank int
+	row.Scan(&bank)
+	fmt.Println(bank)
+	return result, bank == 0, nil
 }
 
 func getProfile(db *sql.DB, srn int) (map[string]string, error) {

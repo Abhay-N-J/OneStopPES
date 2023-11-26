@@ -379,7 +379,8 @@ class DashBoard extends StatelessWidget {
                   child: Text("Error fetching data"),
                 );
               } else {
-                return TimeTableWidget(timetableData: snapshot.data!);
+                return Flexible(
+                    child: TimeTableWidget(timetableData: snapshot.data!));
               }
             })
       ],
