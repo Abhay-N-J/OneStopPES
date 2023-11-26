@@ -21,101 +21,148 @@ class CoursesModel {
   });
 }
 
-class CourseCard extends StatelessWidget {
-  // final NewsItemModel newsItem;
+class CourseCard extends StatefulWidget {
   final CoursesModel courseItem;
   const CourseCard({super.key, required this.courseItem});
 
   @override
+  State<CourseCard> createState() => _CourseCardState();
+}
+
+class _CourseCardState extends State<CourseCard> {
+  bool isExpanded = false;
+
+  void toggleExpansion() {
+    setState(() {
+      isExpanded = !isExpanded;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-    border: Border.all(
-      color: Colors.black, // Border color
-      width: 2.0, // Border width
-    ),
-    borderRadius: BorderRadius.circular(8.0), // Border radius
-  ),
-      child: GestureDetector(
-        // onTap: () {
-        //   Navigator.push(
-        //     context,
-        //     MaterialPageRoute(
-        //       builder: (context) => EventDetailScreen(newsItem: newsItem),
-        //     ),
-        //   );
-        // },
-        child: Row(
-          children: [
-            ImageContainer(
-              // padding: const EdgeInsets.all(10),
-              margin: const EdgeInsets.all(20),
-              borderRadius: const BorderRadius.all(Radius.circular(20)),
-              boxShadow: const [
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: toggleExpansion,
+          child: Container(
+            decoration: BoxDecoration(
+              boxShadow: [
                 BoxShadow(
-                  blurRadius: 10,
-                  offset: Offset(1, 1),
-                  color: Colors.grey,
+                  color: Colors.black.withOpacity(0.5),
+                  spreadRadius: 2,
+                  blurRadius: 2,
+                  offset:
+                      const Offset(0, 3), // Changes the position of the shadow
                 ),
               ],
-              width: MediaQuery.of(context).size.width * 0.2,
-              height: MediaQuery.of(context).size.height * 0.1,
-              imageUrl:
-                  'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRi1xPp49YR8jawQYeWUmDLXzXbwFQb2OUZO4injt7gqA&s',
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color.fromARGB(255, 20, 20, 20), // Starting color (gray)
+                  Color.fromARGB(255, 145, 144, 144), // Ending color (white)
+                ],
+                stops: [0.0, 1.0], // Set the stops for the gradient
+              ),
+              border: Border.all(
+                color: Colors.black, // Border color
+                width: 1.0, // Border width
+              ),
+              borderRadius: BorderRadius.circular(8.0), // Border radius
             ),
-            Flexible(
-              child:
-                  Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Container(
-                  // height: MediaQuery.of(context).size.height * 0.4,
-                  padding: const EdgeInsets.all(5),
-                  decoration: const BoxDecoration(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                    color: Colors.grey,
-                  ),
-                  child: Text(
-                    courseItem.code,
-                    style: Theme.of(context).textTheme.bodyLarge!.copyWith(
-                        fontWeight: FontWeight.bold,
-                        height: 1.25,
-                        color: Colors.black),
-                  ),
-                ),
-                Text(
-                  courseItem.name,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      fontWeight: FontWeight.bold,
-                      height: 1.25,
-                      color: Colors.white),
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Type: ${courseItem.isEC ? 'EC' : 'CC'}",
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                          fontWeight: FontWeight.bold,
-                          height: 1.25,
-                          color: Colors.white),
-                    ),
-                    Text(
-                      "Credits: ${courseItem.credits.toString()}",
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                          fontWeight: FontWeight.bold,
-                          height: 1.25,
-                          color: Colors.white),
+            child: Row(
+              children: [
+                ImageContainer(
+                  // padding: const EdgeInsets.all(10),
+                  margin: const EdgeInsets.all(20),
+                  borderRadius: const BorderRadius.all(Radius.circular(20)),
+                  boxShadow: const [
+                    BoxShadow(
+                      blurRadius: 10,
+                      offset: Offset(1, 1),
+                      color: Colors.grey,
                     ),
                   ],
-                )
-              ]),
+                  width: MediaQuery.of(context).size.width * 0.2,
+                  height: MediaQuery.of(context).size.height * 0.1,
+                  imageUrl:
+                      'https://i.pinimg.com/736x/1f/aa/9c/1faa9cd83704870669717e8b98c31102.jpg',
+                ),
+                Flexible(
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          // height: MediaQuery.of(context).size.height * 0.4,
+                          padding: const EdgeInsets.all(5),
+                          decoration: const BoxDecoration(
+                            borderRadius: BorderRadius.all(Radius.circular(10)),
+                            color: Colors.orange,
+                          ),
+                          child: Text(
+                            widget.courseItem.code,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium!
+                                .copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    height: 1.25,
+                                    color: Colors.black),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 5,
+                        ),
+                        Text(
+                          widget.courseItem.name,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium!
+                              .copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  height: 1.25,
+                                  color: Colors.white),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Type: ${widget.courseItem.isEC ? 'EC' : 'CC'}",
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall!
+                                    .copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        height: 1.25,
+                                        color: Colors.white),
+                              ),
+                              Text(
+                                "Credits: ${widget.courseItem.credits.toString()}",
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall!
+                                    .copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        height: 1.25,
+                                        color: Colors.white),
+                              ),
+                            ],
+                          ),
+                        )
+                      ]),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
-      ),
+        if (isExpanded) const Text('link'),
+      ],
     );
   }
 }

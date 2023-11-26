@@ -191,11 +191,10 @@ class _AuthWidgetState extends State<Auth> with TickerProviderStateMixin {
                                   EdgeInsetsDirectional.fromSTEB(0, 2, 0, 20),
                               child: FFButtonWidget(
                                 onPressed: () {
-                                  Navigator.of(context).pushReplacement(
-                                      PageRouteBuilder(
-                                          pageBuilder: (context, animation,
-                                                  secondaryAnimation) =>
-                                              const SignUpScreen()));
+                                  Navigator.of(context).push(PageRouteBuilder(
+                                      pageBuilder: (context, animation,
+                                              secondaryAnimation) =>
+                                          const SignUpScreen()));
                                 },
                                 text: 'Register',
                                 options: FFButtonOptions(
@@ -225,11 +224,10 @@ class _AuthWidgetState extends State<Auth> with TickerProviderStateMixin {
                             ),
                             FFButtonWidget(
                               onPressed: () {
-                                Navigator.of(context).pushReplacement(
-                                    PageRouteBuilder(
-                                        pageBuilder: (context, animation,
-                                                secondaryAnimation) =>
-                                            const LoginScreen()));
+                                Navigator.of(context).push(PageRouteBuilder(
+                                    pageBuilder: (context, animation,
+                                            secondaryAnimation) =>
+                                        const LoginScreen()));
                               },
                               text: 'Login',
                               options: FFButtonOptions(
