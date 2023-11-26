@@ -125,6 +125,22 @@ func main() {
 
 	})
 
+	router.GET("/results", func(ctx *gin.Context) {
+		srn, err := strconv.Atoi(ctx.Query("srn"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		data, err := getResults(db, srn)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"data": data,
+		})
+
+	})
+
 	router.GET("/profile", func(ctx *gin.Context) {
 		srn, err := strconv.Atoi(ctx.Query("srn"))
 		if err != nil {
@@ -297,6 +313,37 @@ func getTimeTable(db *sql.DB, sem int) ([]map[string]string, error) {
 
 	return result, nil
 
+}
+
+func getResults(db *sql.DB, srn int) ([]map[string]string, error) {
+	result := make([]map[string]string, 0)
+
+	query := "CALL CALCULATEGRADES(?)"
+
+	rows, err := db.Query(query, srn)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		r := make(map[string]string)
+		var code, grade string
+		var isa1, isa2, esa int
+		var final float64
+		rows.Scan(&isa1, &isa2, &esa, &code, &final, &grade)
+		r["isa1"] = strconv.Itoa(isa1)
+		r["isa2"] = strconv.Itoa(isa2)
+		r["esa"] = strconv.Itoa(esa)
+		r["code"] = code
+		r["grade"] = grade
+		r["final"] = strconv.FormatFloat(final, 'g', 4, 64)
+		result = append(result, r)
+	}
+
+	return result, nil
 }
 
 func getCourses(db *sql.DB, srn int) ([]map[string]string, error) {
