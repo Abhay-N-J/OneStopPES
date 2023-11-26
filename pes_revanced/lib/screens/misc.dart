@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 class MiscPage extends StatefulWidget {
+  const MiscPage({super.key});
+
   @override
   State<MiscPage> createState() => _MiscPageState();
 }
