@@ -53,6 +53,22 @@ class NotificationCard extends StatelessWidget {
           }
         }
       },
+      onLongPress: () {
+        showModalBottomSheet(
+            context: context,
+            builder: (BuildContext context) {
+              return Container(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  notifItem.headline,
+                  style: const TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              );
+            });
+      },
       child: Container(
         decoration: BoxDecoration(
           color: Colors.black,
@@ -115,7 +131,8 @@ class NotificationCard extends StatelessWidget {
                     ),
                     Text(
                       notifItem.message,
-                      overflow: TextOverflow.ellipsis,
+                      softWrap: true,
+                      overflow: TextOverflow.visible,
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                           fontWeight: FontWeight.bold,
                           height: 1.25,

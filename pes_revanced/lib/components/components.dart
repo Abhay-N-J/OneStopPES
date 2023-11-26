@@ -35,6 +35,7 @@ class CustomButton extends StatelessWidget {
           child: Center(
             child: Text(
               buttonText,
+              overflow: TextOverflow.fade,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
@@ -129,7 +130,7 @@ class CustomBottomScreen extends StatelessWidget {
           alignment: Alignment.centerLeft,
           child: Padding(
             padding: const EdgeInsets.symmetric(
-              horizontal: 30,
+              horizontal: 10,
             ),
             child: GestureDetector(
               onTap: () {

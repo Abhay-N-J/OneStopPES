@@ -356,6 +356,9 @@ class DashBoard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        const SizedBox(
+          height: 100,
+        ),
         FutureBuilder<StudentModel?>(
             future: fetchProfile(),
             builder: (context, snapshot) {
