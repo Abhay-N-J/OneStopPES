@@ -1,4 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:pes_revanced/constants.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class StudentModel {
   final int srn;
@@ -17,16 +22,14 @@ class StudentModel {
       required this.cgpa});
 }
 
-var studItem = [
-  StudentModel(
-    srn: 1234,
-    branch: 'Computer Science',
-    email: 'student1@example.com',
-    sem: 3,
-    name: 'John Doe',
-    cgpa: 8.5,
-  ),
-];
+var studItem = StudentModel(
+  srn: 1234,
+  branch: 'Computer Science',
+  email: 'student1@example.com',
+  sem: 3,
+  name: 'John Doe',
+  cgpa: 8.5,
+);
 
 class TimeTableModel {
   final String day;
@@ -71,21 +74,20 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var montserrat = const TextStyle(
-      fontSize: 12,
-    );
+    var montserrat = buildMontserrat(Colors.black);
     return Column(
       children: [
         Material(
           child: Container(
-            height: double.infinity,
-            width: double.infinity,
+            // height: double.infinity,
+            width: MediaQuery.sizeOf(context).width,
             decoration: const BoxDecoration(
               color: Colors.blue,
             ),
             child: Center(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 400),
                   decoration: BoxDecoration(
@@ -137,7 +139,8 @@ class ProfileScreen extends StatelessWidget {
                                       ),
                                       const SizedBox(height: 8),
                                       Text(
-                                        "Branch : ${studItem.branch}",
+                                        studItem.branch,
+                                        overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
                                           fontSize: 20,
                                           color: darkColor,
@@ -163,12 +166,12 @@ class ProfileScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
-                                  "SRN: \n Email: ",
+                                  "SRN: \nEmail: ",
                                   style: montserrat,
                                 ),
                                 const SizedBox(height: 16),
                                 Text(
-                                  "SEM: \n CGPA: ",
+                                  "SEM: \nCGPA: ",
                                   style: montserrat,
                                 ),
                               ],
@@ -308,5 +311,93 @@ class AvatarClipper extends CustomClipper<Path> {
   @override
   bool shouldReclip(covariant CustomClipper<Path> oldClipper) {
     return true;
+  }
+}
+
+class DashBoard extends StatelessWidget {
+  const DashBoard({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        FutureBuilder<StudentModel?>(
+            future: fetchProfile(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              } else if (snapshot.data == null) {
+                return const Center(
+                  child: Text("Error fetching data"),
+                );
+              } else {
+                return ProfileScreen(studItem: snapshot.data!);
+              }
+            }),
+        FutureBuilder<List<TimeTableModel>>(
+            future: fetchTimeTable(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              } else if (snapshot.data == null) {
+                return const Center(
+                  child: Text("Error fetching data"),
+                );
+              } else {
+                return TimeTableWidget(timetableData: snapshot.data!);
+              }
+            })
+      ],
+    );
+  }
+}
+
+Future<StudentModel?> fetchProfile() async {
+  try {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String srn = prefs.getString("srn")!;
+    final response = await http.get(Uri.parse("$goURI/profile?srn=$srn"));
+    if (response.statusCode == 200) {
+      Map<String, dynamic> map = json.decode(response.body);
+      final value = StudentModel(
+          srn: int.parse(map["srn"]),
+          branch: map["branch"],
+          email: map["email"],
+          sem: int.parse(map["sem"]),
+          name: map["name"],
+          cgpa: double.parse(map["cgpa"]));
+      return value;
+    } else {
+      return null;
+    }
+  } catch (e) {
+    print(e.toString());
+    return null;
+  }
+}
+
+Future<List<TimeTableModel>> fetchTimeTable() async {
+  try {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String sem = prefs.getString("sem")!;
+    final response = await http.get(Uri.parse("$goURI/timetable?sem=$sem"));
+    if (response.statusCode == 200) {
+      Map<String, dynamic> map = json.decode(response.body);
+      List<dynamic> map2 = map["data"];
+      var values = map2
+          .map((e) => TimeTableModel(
+              day: e["day"],
+              roomNo: int.parse(e["room"]),
+              time: e["time"],
+              code: e["code"],
+              instructorName: e["name"]))
+          .toList();
+      return values;
+    } else {
+      return [];
+    }
+  } catch (e) {
+    print(e.toString());
+    return [];
   }
 }

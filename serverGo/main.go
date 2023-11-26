@@ -42,7 +42,15 @@ func main() {
 	})
 
 	router.GET("/course", func(ctx *gin.Context) {
-		data, err := getCourses(db)
+		srn, err := strconv.Atoi(ctx.Query("srn"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": err.Error(),
+			})
+			return
+		}
+
+		data, err := getCourses(db, srn)
 
 		if err != nil {
 			ctx.JSON(http.StatusServiceUnavailable, gin.H{
@@ -98,6 +106,36 @@ func main() {
 		ctx.JSON(http.StatusOK, gin.H{
 			"data": data,
 		})
+
+	})
+
+	router.GET("/timetable", func(ctx *gin.Context) {
+		sem, err := strconv.Atoi(ctx.Query("sem"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		data, err := getTimeTable(db, sem)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{
+			"data": data,
+		})
+
+	})
+
+	router.GET("/profile", func(ctx *gin.Context) {
+		srn, err := strconv.Atoi(ctx.Query("srn"))
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		}
+		data, err := getProfile(db, srn)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, data)
 
 	})
 
@@ -179,7 +217,7 @@ func signUp(db *sql.DB, email string, pass string) (map[string]string, error) {
 func getNotifs(db *sql.DB, srn int) ([]map[string]string, error) {
 	result := make([]map[string]string, 0)
 
-	query := "CALL getStudentAnnouncements(?)"
+	query := "CALL GetStudentAnnouncements(?)"
 
 	rows, err := db.Query(query, srn)
 
@@ -193,7 +231,6 @@ func getNotifs(db *sql.DB, srn int) ([]map[string]string, error) {
 		r := make(map[string]string)
 		var link, message, title string
 		rows.Scan(&link, &message, &title)
-		println(link, message, title)
 		r["link"] = link
 		r["message"] = message
 		r["title"] = title
@@ -203,51 +240,83 @@ func getNotifs(db *sql.DB, srn int) ([]map[string]string, error) {
 	return result, nil
 }
 
-func getCourses(db *sql.DB) ([]map[string]string, error) {
-	result := make([]map[string]string, 0)
-	query := `SELECT * FROM COURSE`
-	query_2 := `SELECT * FROM ELECTIVES`
-	rows1, err := db.Query(query)
+func getProfile(db *sql.DB, srn int) (map[string]string, error) {
+
+	query := "SELECT SRN, BRANCH, NAME, EMAIL, CGPA, SEM FROM STUDENT WHERE SRN=?"
+
+	row, err := db.Query(query, srn)
+
 	if err != nil {
 		return nil, err
 	}
-	defer rows1.Close()
 
-	// Fetch results from the first query and add to the map
-	for rows1.Next() {
+	defer row.Close()
+
+	row.Next()
+	r := make(map[string]string)
+	var branch, name, email string
+	var sem int
+	var cgpa float64
+	row.Scan(&srn, &branch, &name, &email, &cgpa, &sem)
+	r["srn"] = strconv.Itoa(srn)
+	r["branch"] = branch
+	r["name"] = name
+	r["email"] = email
+	r["cgpa"] = strconv.FormatFloat(cgpa, 'g', 2, 64)
+	r["sem"] = strconv.Itoa(sem)
+
+	return r, nil
+}
+
+func getTimeTable(db *sql.DB, sem int) ([]map[string]string, error) {
+
+	result := make([]map[string]string, 0)
+
+	query := "CALL GetSemesterSchedule(?)"
+
+	rows, err := db.Query(query, sem)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
 		r := make(map[string]string)
-		var code, name, dept string
-		var credits int
-		if err := rows1.Scan(&name, &code, &dept, &credits); err != nil {
-			return nil, err
-		}
+		var day, time, code, name string
+		var room_no int
+		rows.Scan(&day, &room_no, &time, &code, &name)
+		r["day"] = day
+		r["room"] = strconv.Itoa(room_no)
+		r["time"] = time
 		r["code"] = code
 		r["name"] = name
-		r["dept"] = dept
-		r["credits"] = strconv.Itoa(credits)
 		result = append(result, r)
 	}
 
-	// Execute the second query
-	rows2, err := db.Query(query_2)
+	return result, nil
+
+}
+
+func getCourses(db *sql.DB, srn int) ([]map[string]string, error) {
+	result := make([]map[string]string, 0)
+	query := `CALL GetStudentCoursesAndElectives(?)`
+	rows, err := db.Query(query, srn)
 	if err != nil {
 		return nil, err
 	}
-	defer rows2.Close()
+	defer rows.Close()
 
-	// Fetch results from the second query and add to the map
-	for rows2.Next() {
+	for rows.Next() {
 		r := make(map[string]string)
-		var code, name, dept, preReq string
+		var code, name, dept string
 		var credits int
-		if err := rows2.Scan(&code, &name, &credits, &dept, &preReq); err != nil {
-			return nil, err
-		}
+		rows.Scan(&code, &name, &dept, &credits)
 		r["code"] = code
 		r["name"] = name
 		r["dept"] = dept
 		r["credits"] = strconv.Itoa(credits)
-		r["preReq"] = preReq
 		result = append(result, r)
 	}
 

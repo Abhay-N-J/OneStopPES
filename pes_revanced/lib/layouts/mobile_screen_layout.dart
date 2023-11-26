@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:pes_revanced/constants.dart';
 import 'package:pes_revanced/screens/auth.dart';
 import 'package:pes_revanced/screens/courses.dart';
+import 'package:pes_revanced/screens/dashboard.dart';
 import 'package:pes_revanced/screens/misc.dart';
 import 'package:pes_revanced/screens/notifications.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -29,8 +30,6 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
     super.initState();
     pageController = PageController();
   }
-
-  // static List<Widget> homeScreenItems =
 
   static const primaryColor = Colors.pink;
   static const secondaryColor = Colors.grey;
@@ -86,8 +85,8 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
           const Center(
             child: PopulateCourses(),
           ),
-          Center(
-            child: Text("Dashboard"),
+          const Center(
+            child: DashBoard(),
           ),
           Center(child: Text("Exams")),
           Center(
@@ -136,22 +135,6 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
 }
 
 Future<String> fetchData() async {
-  // try {
-  //   var settings = ConnectionSettings(
-  //       host: '10.5.18.244',
-  //       port: 3306,
-  //       user: 'abhay',
-  //       password: 'a123',
-  //       db: 'Project');
-  //   print("Starting");
-  //   var conn = await MySqlConnection.connect(settings);
-  //   var results = await conn.query('select * from student');
-  //   print(results as String);
-  //   return results.first as String;
-  // } catch (e) {
-  //   print(e.toString());
-  // }
-  // return "Hello";
   try {
     final response = await http.get(Uri.parse('$goURI/data'));
     if (response.statusCode == 200) {
@@ -199,7 +182,9 @@ class PopulateCourses extends StatelessWidget {
 
 Future<List<CoursesModel>> fetchCourses() async {
   try {
-    final response = await http.get(Uri.parse("$goURI/course"));
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String srn = prefs.getString("srn")!;
+    final response = await http.get(Uri.parse("$goURI/course?srn=$srn"));
     if (response.statusCode == 200) {
       Map<String, dynamic> map = json.decode(response.body);
       List<dynamic> map2 = map["data"];
