@@ -43,7 +43,8 @@ class _MobileScreenLayoutState extends State<MobileScreenLayout> {
   }
 
   void navigationTapped(int page) {
-    pageController.jumpToPage(page);
+    pageController.animateToPage(page,
+        duration: const Duration(milliseconds: 350), curve: Curves.bounceOut);
   }
 
   void onPageChanged(int page) {

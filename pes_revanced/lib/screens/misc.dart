@@ -31,11 +31,11 @@ class _MiscPageState extends State<MiscPage> {
                         child: Text(option),
                       ))
                   .toList(),
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 labelText: 'Select an option',
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             if (selectedOption == 'scholarship') ScholarshipWidget(),
             if (selectedOption == 'elective') ElectiveCoursesWidget(),
             if (selectedOption == 'feedback') FeedbackFormWidget(),
@@ -57,8 +57,8 @@ class ScholarshipWidget extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Scholarship Details'),
-        if (requiresBankDetails) Text('Please provide bank details'),
+        const Text('Scholarship Details'),
+        if (requiresBankDetails) const Text('Please provide bank details'),
         // Add other scholarship details widgets
       ],
     );
@@ -71,7 +71,7 @@ class ElectiveCoursesWidget extends StatelessWidget {
     // Add your logic here to create elective courses form
     // Include a form with checkboxes for each elective course
 
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Elective Courses'),
@@ -86,7 +86,7 @@ class FeedbackFormWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     // Add your logic here to create feedback form
 
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Feedback Form'),

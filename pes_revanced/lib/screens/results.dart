@@ -74,14 +74,15 @@ class ResultPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Results'),
+        title: const Text('Results'),
+        //backgroundColor: Colors.pinkAccent,
       ),
       body: ListView.builder(
         itemCount: resultData.length,
         itemBuilder: (context, index) {
           final data = resultData[index];
           return Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(5.0),
             child: Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -90,29 +91,50 @@ class ResultPage extends StatelessWidget {
                   children: [
                     Text(
                       data.code,
-                      style: TextStyle(
-                        fontSize: 20,
+                      style: const TextStyle(
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
+                        color: Colors.orange,
                       ),
                     ),
                     const SizedBox(height: 8),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildPieChart(
-                          data.isa1.toDouble(),
-                          data.isa2.toDouble(),
-                          'ISAs',
+                        Column(
+                          children: [
+                            _buildPieChart(
+                              data.isa1.toDouble(),
+                              40 - data.isa1.toDouble(),
+                              'ISA1',
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            _buildPieChart(
+                              data.isa2.toDouble(),
+                              40 - data.isa2.toDouble(),
+                              'ISA2',
+                            ),
+                          ],
                         ),
-                        _buildPieChart(
-                          data.esa.toDouble(),
-                          0.0,
-                          'ESAs',
+                        const SizedBox(
+                          width: 20,
                         ),
-                        _buildPieChart(
-                          data.final1.toDouble(),
-                          0.0,
-                          'Final',
+                        Column(
+                          children: [
+                            _buildPieChart(
+                              data.esa.toDouble(),
+                              100 - data.esa.toDouble(),
+                              'ESA',
+                            ),
+                            const SizedBox(height: 10),
+                            _buildPieChart(
+                              data.final1.toDouble(),
+                              100 - data.final1.toDouble(),
+                              'FINAL',
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -129,23 +151,43 @@ class ResultPage extends StatelessWidget {
   }
 
   Widget _buildPieChart(double value1, double value2, String title) {
-    return SizedBox(
-      width: 100,
-      height: 100,
-      child: PieChart(
-        PieChartData(
-          sections: [
-            PieChartSectionData(
-              value: value1,
-              color: Colors.blue,
-            ),
-            PieChartSectionData(
-              value: value2,
-              color: Colors.grey,
-            ),
-          ],
+    return Column(
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+              fontSize: 20,
+              color: Colors.pinkAccent,
+              fontWeight: FontWeight.bold),
         ),
-      ),
+        SizedBox(
+          width: 150,
+          height: 150,
+          child: PieChart(
+            PieChartData(
+              centerSpaceRadius: 7,
+              //pieTouchData: PieTouchData(enabled: true),
+              borderData: FlBorderData(show: false),
+              sectionsSpace: 2,
+              sections: [
+                PieChartSectionData(
+                  value: value1.roundToDouble(),
+                  color: Colors.green,
+                  showTitle: true,
+                  titleStyle: const TextStyle(fontSize: 24),
+                  radius: 60,
+                ),
+                PieChartSectionData(
+                  value: value2.truncateToDouble(),
+                  color: Colors.red,
+                  showTitle: true,
+                  radius: 60,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -176,9 +218,9 @@ class ResultPage extends StatelessWidget {
     }
 
     return Text(
-      grade,
+      "Grade: $grade",
       style: TextStyle(
-        fontSize: 24,
+        fontSize: 30,
         color: gradeColor,
       ),
       textAlign: TextAlign.center,

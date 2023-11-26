@@ -46,6 +46,15 @@ class _CourseCardState extends State<CourseCard> {
           onTap: toggleExpansion,
           child: Container(
             decoration: BoxDecoration(
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  spreadRadius: 2,
+                  blurRadius: 2,
+                  offset:
+                      const Offset(0, 3), // Changes the position of the shadow
+                ),
+              ],
               gradient: const LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
@@ -152,11 +161,7 @@ class _CourseCardState extends State<CourseCard> {
             ),
           ),
         ),
-        if (isExpanded)
-          Container(
-            //padding: EdgeInsets.all(16.0),
-            child: Text('Hello'),
-          ),
+        if (isExpanded) const Text('link'),
       ],
     );
   }

@@ -74,7 +74,7 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var montserrat = buildMontserrat(Colors.black);
+    var montserrat = buildMontserrat(Colors.pinkAccent);
     return Column(
       children: [
         Material(
@@ -82,17 +82,24 @@ class ProfileScreen extends StatelessWidget {
             // height: double.infinity,
             width: MediaQuery.sizeOf(context).width,
             decoration: const BoxDecoration(
-              color: Colors.blue,
+              color: Colors.black,
             ),
             child: Center(
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                padding: const EdgeInsets.fromLTRB(10, 10, 10, 4),
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 400),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: const Color.fromARGB(255, 44, 58, 71),
                     borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(1),
+                        spreadRadius: 5,
+                        blurRadius: 2,
+                        //offset: Offset(0, 3), // Changes the position of the shadow
+                      ),
+                    ],
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -107,7 +114,7 @@ class ProfileScreen extends StatelessWidget {
                               child: Container(
                                 height: 100,
                                 decoration: const BoxDecoration(
-                                  color: darkColor,
+                                  color: Colors.black,
                                   borderRadius: BorderRadius.only(
                                     topRight: Radius.circular(20),
                                     topLeft: Radius.circular(20),
@@ -133,7 +140,7 @@ class ProfileScreen extends StatelessWidget {
                                         studItem.name,
                                         style: const TextStyle(
                                           fontSize: 32,
-                                          color: Color(0xFFFFFFFF),
+                                          color: Colors.greenAccent,
                                         ),
                                       ),
                                       const SizedBox(height: 8),
@@ -141,8 +148,8 @@ class ProfileScreen extends StatelessWidget {
                                         studItem.branch,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
-                                          fontSize: 20,
-                                          color: darkColor,
+                                          fontSize: 28,
+                                          color: Colors.orange,
                                         ),
                                       ),
                                       const SizedBox(height: 8)
@@ -157,7 +164,7 @@ class ProfileScreen extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
-                          vertical: 30,
+                          vertical: 17,
                         ),
                         child: Row(
                           children: [
@@ -179,20 +186,41 @@ class ProfileScreen extends StatelessWidget {
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(studItem.srn.toString(),
-                                    style: montserrat),
-                                Text(studItem.email, style: montserrat),
+                                Text(
+                                  studItem.srn.toString(),
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Text(
+                                  studItem.email,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
                                 const SizedBox(height: 16),
-                                Text(studItem.sem.toString(),
-                                    style: montserrat),
-                                Text(studItem.cgpa.toString(),
-                                    style: montserrat),
+                                Text(
+                                  studItem.sem.toString(),
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Text(
+                                  studItem.cgpa.toString(),
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ],
                             )
                           ],
                         ),
                       ),
-                      const SizedBox(height: 8)
+                      //const SizedBox(height: 4)
                     ],
                   ),
                 ),
@@ -200,6 +228,7 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ),
+        const SizedBox(height: 10),
       ],
     );
   }
@@ -231,64 +260,71 @@ class _TimeTableWidgetState extends State<TimeTableWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
       child: SingleChildScrollView(
-        child: DataTable(
-          headingRowColor: MaterialStateProperty.resolveWith<Color>(
-            (Set<MaterialState> states) {
-              return Theme.of(context).primaryColor; // Custom header color
-            },
-          ),
-          headingTextStyle:
-              TextStyle(color: Colors.white), // Text style for header text
-          dataRowColor: MaterialStateProperty.resolveWith<Color>(
-            (Set<MaterialState> states) {
-              return Colors.grey[800]!; // Custom cell color
-            },
-          ),
-          columns: [
-            DataColumn(
-              label: Text('Day'),
-              onSort: (columnIndex, ascending) {
-                setState(() {
-                  if (_sortAscending) {
-                    widget.timetableData.sort((a, b) => a.day.compareTo(b.day));
-                  } else {
-                    widget.timetableData.sort((a, b) => b.day.compareTo(a.day));
-                  }
-                  _sortAscending = !_sortAscending;
-                });
+        scrollDirection: Axis.horizontal,
+        child: SingleChildScrollView(
+          child: DataTable(
+            headingRowColor: MaterialStateProperty.resolveWith<Color>(
+              (Set<MaterialState> states) {
+                return Theme.of(context).primaryColor; // Custom header color
               },
             ),
-            DataColumn(label: Text('Room No')),
-            DataColumn(
-              label: Text('Time'),
-              onSort: (columnIndex, ascending) {
-                setState(() {
-                  if (_sortAscending) {
-                    widget.timetableData
-                        .sort((a, b) => a.time.compareTo(b.time));
-                  } else {
-                    widget.timetableData
-                        .sort((a, b) => b.time.compareTo(a.time));
-                  }
-                  _sortAscending = !_sortAscending;
-                });
+            headingTextStyle: const TextStyle(
+                fontSize: 20,
+                color: Colors.green), // Text style for header text
+            dataRowColor: MaterialStateProperty.resolveWith<Color>(
+              (Set<MaterialState> states) {
+                return const Color.fromARGB(
+                    255, 22, 40, 62); // Custom cell color
               },
             ),
-            DataColumn(label: Text('Code')),
-            DataColumn(label: Text('Instructor Name')),
-          ],
-          rows: widget.timetableData.map((data) {
-            return DataRow(cells: [
-              DataCell(Text(data.day)),
-              DataCell(Text(data.roomNo.toString())),
-              DataCell(Text(data.time)),
-              DataCell(Text(data.code)),
-              DataCell(Text(data.instructorName)),
-            ]);
-          }).toList(),
+            columns: [
+              DataColumn(
+                label: const Text('Day'),
+                onSort: (columnIndex, ascending) {
+                  setState(() {
+                    if (_sortAscending) {
+                      widget.timetableData
+                          .sort((a, b) => a.day.compareTo(b.day));
+                    } else {
+                      widget.timetableData
+                          .sort((a, b) => b.day.compareTo(a.day));
+                    }
+                    _sortAscending = !_sortAscending;
+                  });
+                },
+              ),
+              const DataColumn(label: Text('Room No')),
+              DataColumn(
+                label: const Text('Time'),
+                onSort: (columnIndex, ascending) {
+                  setState(() {
+                    if (_sortAscending) {
+                      widget.timetableData
+                          .sort((a, b) => a.time.compareTo(b.time));
+                    } else {
+                      widget.timetableData
+                          .sort((a, b) => b.time.compareTo(a.time));
+                    }
+                    _sortAscending = !_sortAscending;
+                  });
+                },
+              ),
+              const DataColumn(label: Text('Code')),
+              const DataColumn(label: Text('Instructor Name')),
+            ],
+            rows: widget.timetableData.map((data) {
+              return DataRow(cells: [
+                DataCell(Text(data.day)),
+                DataCell(Text(data.roomNo.toString())),
+                DataCell(Text(data.time)),
+                DataCell(Text(data.code)),
+                DataCell(Text(data.instructorName)),
+              ]);
+            }).toList(),
+          ),
         ),
       ),
     );
