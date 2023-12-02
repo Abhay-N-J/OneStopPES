@@ -122,11 +122,18 @@ class _ScholarshipWidgetState extends State<ScholarshipWidget> {
                 final item = scholars[index];
                 return Row(
                   children: [
-                    Text(item["type"]),
+                    Text(
+                      "Type :" + item["type"],
+                      style: const TextStyle(
+                          color: Colors.pinkAccent, fontSize: 24),
+                    ),
                     const SizedBox(
                       width: 10,
                     ),
-                    Text(item["sem"])
+                    Text(
+                      "SEM :" + item["sem"],
+                      style: const TextStyle(color: Colors.cyan, fontSize: 24),
+                    ),
                   ],
                 );
               }),

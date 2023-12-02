@@ -148,7 +148,7 @@ class ProfileScreen extends StatelessWidget {
                                         studItem.branch,
                                         overflow: TextOverflow.ellipsis,
                                         style: const TextStyle(
-                                          fontSize: 28,
+                                          fontSize: 24,
                                           color: Colors.orange,
                                         ),
                                       ),
